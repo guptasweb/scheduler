@@ -1,0 +1,28 @@
+# See https://help.github.com/articles/ignoring-files for more.
+
+# Dependencies
+/vendor/bundle
+
+# Logfiles and tempfiles
+/log/*
+!/log/.keep
+
+/tmp/*
+!/tmp/.keep
+!/tmp/pids/
+
+/tmp/pids/*
+!/tmp/pids/.keep
+
+# SQLite (local/dev)
+/db/*.sqlite3
+/db/*.sqlite3-journal
+/db/*.sqlite3-*
+
+# Env and secrets generated locally
+.env*
+!.env.example
+/tmp/local_secret.txt
+
+# Coverage / tooling
+/coverage/
