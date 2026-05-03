@@ -2,12 +2,17 @@
 
 A Rails 7 API-only backend for scheduling social media posts.
 
+## Prerequisites
+
+- Ruby **3.2.11**
+- Bundler
+
 ## Setup
 
 ```bash
 bundle install
-rails db:create db:migrate db:seed
-rails server -p 3000
+bin/rails db:prepare
+bin/rails server -p 3000
 ```
 
 ## API Endpoints
@@ -29,7 +34,7 @@ rails server -p 3000
 - `?scope=upcoming` — only future posts
 - `?scope=past` — only past posts
 
-## Running Tests
+## Running tests
 
 ```bash
 bundle exec rspec

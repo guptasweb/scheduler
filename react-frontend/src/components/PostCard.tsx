@@ -1,9 +1,18 @@
+import type { CSSProperties } from "react";
+import type { Post } from "../types";
 import { StatusBadge } from "./StatusBadge";
 import { formatScheduledDate, formatRelativeDate, getDateStatus } from "../utils/dates";
 
-export function PostCard({ post, onClick, style }) {
+type PostCardProps = {
+  post: Post;
+  onClick: (post: Post) => void;
+  style?: CSSProperties;
+};
+
+export function PostCard({ post, onClick, style }: PostCardProps) {
   const dateStatus = getDateStatus(post.scheduled_date, post.status);
-  const hasPhotos = post.photos?.length > 0;
+  const hasPhotos = (post.photos?.length ?? 0) > 0;
+  const photoCount = post.photos?.length ?? 0;
 
   return (
     <article
@@ -11,7 +20,6 @@ export function PostCard({ post, onClick, style }) {
       style={style}
       onClick={() => onClick(post)}
     >
-      {/* Header row */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <h2 className="font-display font-semibold text-base text-white group-hover:text-signal transition-colors line-clamp-1">
           {post.title}
@@ -19,12 +27,10 @@ export function PostCard({ post, onClick, style }) {
         <StatusBadge status={dateStatus} />
       </div>
 
-      {/* Body text */}
       <p className="text-white/50 text-sm leading-relaxed line-clamp-2 mb-4 font-body">
         {post.post_text}
       </p>
 
-      {/* Footer */}
       <div className="flex items-center justify-between pt-3 border-t border-white/5">
         <div className="flex flex-col gap-0.5">
           <span className="text-white/30 text-xs font-mono">SCHEDULED</span>
@@ -40,7 +46,7 @@ export function PostCard({ post, onClick, style }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                   d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              {post.photos.length}
+              {photoCount}
             </span>
           )}
           <span className="text-white/25 text-xs font-mono">

@@ -1,13 +1,30 @@
 import { useState, useEffect } from "react";
+import type { ChangeEvent, FormEvent } from "react";
+import type { Post, PostFormData, PostStatus } from "../types";
 import { formatInputDate } from "../utils/dates";
 
-const EMPTY_FORM = { title: "", post_text: "", scheduled_date: "", status: "scheduled" };
+type FormState = PostFormData & { status: PostStatus };
 
-export function PostForm({ post, onSubmit, onCancel, loading }) {
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [errors, setErrors] = useState({});
+const EMPTY_FORM: FormState = {
+  title: "",
+  post_text: "",
+  scheduled_date: "",
+  status: "scheduled",
+};
 
-  // Populate form when editing an existing post
+type FieldErrors = Partial<Record<keyof FormState, string>>;
+
+type PostFormProps = {
+  post: Post | null;
+  onSubmit: (data: PostFormData) => Promise<void>;
+  onCancel: () => void;
+  loading?: boolean;
+};
+
+export function PostForm({ post, onSubmit, onCancel, loading }: PostFormProps) {
+  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [errors, setErrors] = useState<FieldErrors>({});
+
   useEffect(() => {
     if (post) {
       setForm({
@@ -21,8 +38,8 @@ export function PostForm({ post, onSubmit, onCancel, loading }) {
     }
   }, [post]);
 
-  function validate() {
-    const errs = {};
+  function validate(): FieldErrors {
+    const errs: FieldErrors = {};
     if (!form.title.trim()) errs.title = "Title is required";
     if (form.title.length > 255) errs.title = "Title must be under 255 characters";
     if (!form.post_text.trim()) errs.post_text = "Post content is required";
@@ -30,27 +47,39 @@ export function PostForm({ post, onSubmit, onCancel, loading }) {
     return errs;
   }
 
-  function handleChange(e) {
+  function handleChange(
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: null }));
+    const key = name as keyof FormState;
+    setForm((prev) =>
+      key === "status"
+        ? { ...prev, status: value as PostStatus }
+        : { ...prev, [key]: value }
+    );
+    if (errors[key]) setErrors((prev) => ({ ...prev, [key]: undefined }));
   }
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       return;
     }
-    await onSubmit(form);
+    const payload: PostFormData = {
+      title: form.title,
+      post_text: form.post_text,
+      scheduled_date: form.scheduled_date,
+      ...(post ? { status: form.status } : {}),
+    };
+    await onSubmit(payload);
   }
 
   const isEditing = !!post;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-      {/* Title */}
       <div>
         <label className="block text-xs font-mono text-white/40 uppercase tracking-wider mb-2">
           Title
@@ -71,7 +100,6 @@ export function PostForm({ post, onSubmit, onCancel, loading }) {
         )}
       </div>
 
-      {/* Post text */}
       <div>
         <label className="block text-xs font-mono text-white/40 uppercase tracking-wider mb-2">
           Post Content
@@ -92,7 +120,6 @@ export function PostForm({ post, onSubmit, onCancel, loading }) {
         )}
       </div>
 
-      {/* Date and Status row */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-mono text-white/40 uppercase tracking-wider mb-2">
@@ -134,7 +161,6 @@ export function PostForm({ post, onSubmit, onCancel, loading }) {
         )}
       </div>
 
-      {/* Actions */}
       <div className="flex items-center justify-end gap-3 pt-2">
         <button type="button" onClick={onCancel} className="btn-ghost">
           Cancel
@@ -148,7 +174,11 @@ export function PostForm({ post, onSubmit, onCancel, loading }) {
               </svg>
               Saving...
             </>
-          ) : isEditing ? "Save Changes" : "Schedule Post"}
+          ) : isEditing ? (
+            "Save Changes"
+          ) : (
+            "Schedule Post"
+          )}
         </button>
       </div>
     </form>

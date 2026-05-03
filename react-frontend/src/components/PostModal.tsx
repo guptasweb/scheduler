@@ -1,13 +1,22 @@
 import { useEffect } from "react";
+import type { Post } from "../types";
 import { StatusBadge } from "./StatusBadge";
 import { formatScheduledDate, getDateStatus } from "../utils/dates";
 
-export function PostModal({ post, onClose, onEdit, onDelete }) {
+type PostModalProps = {
+  post: Post;
+  onClose: () => void;
+  onEdit: (post: Post) => void;
+  onDelete: (id: number) => void;
+};
+
+export function PostModal({ post, onClose, onEdit, onDelete }: PostModalProps) {
   const dateStatus = getDateStatus(post.scheduled_date, post.status);
 
-  // Close on Escape key
   useEffect(() => {
-    const handler = (e) => { if (e.key === "Escape") onClose(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
@@ -15,14 +24,13 @@ export function PostModal({ post, onClose, onEdit, onDelete }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-ink-950/80 backdrop-blur-sm" />
 
-      {/* Modal */}
       <div className="relative card w-full max-w-lg max-h-[90vh] overflow-y-auto animate-fade-up">
-        {/* Header */}
         <div className="flex items-start justify-between gap-4 p-6 border-b border-white/8">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
@@ -33,6 +41,7 @@ export function PostModal({ post, onClose, onEdit, onDelete }) {
             </h2>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="text-white/30 hover:text-white transition-colors flex-shrink-0 mt-1"
           >
@@ -42,9 +51,7 @@ export function PostModal({ post, onClose, onEdit, onDelete }) {
           </button>
         </div>
 
-        {/* Body */}
         <div className="p-6 space-y-5">
-          {/* Post text */}
           <div>
             <p className="text-xs font-mono text-white/30 uppercase tracking-wider mb-2">Post Content</p>
             <p className="text-white/80 text-sm leading-relaxed font-body whitespace-pre-wrap">
@@ -52,7 +59,6 @@ export function PostModal({ post, onClose, onEdit, onDelete }) {
             </p>
           </div>
 
-          {/* Scheduled date */}
           <div className="flex items-center gap-3 p-3 bg-ink-800 rounded-xl">
             <div className="w-8 h-8 bg-signal/10 rounded-lg flex items-center justify-center flex-shrink-0">
               <svg className="w-4 h-4 text-signal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -66,8 +72,7 @@ export function PostModal({ post, onClose, onEdit, onDelete }) {
             </div>
           </div>
 
-          {/* Photos */}
-          {post.photos?.length > 0 && (
+          {(post.photos?.length ?? 0) > 0 && post.photos && (
             <div>
               <p className="text-xs font-mono text-white/30 uppercase tracking-wider mb-3">
                 Attached Photos ({post.photos.length})
@@ -81,7 +86,9 @@ export function PostModal({ post, onClose, onEdit, onDelete }) {
                         alt={photo.caption || "Post photo"}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => {
-                          e.target.src = `https://via.placeholder.com/400x300/1c1c28/ffffff?text=Photo`;
+                          const el = e.currentTarget;
+                          el.src =
+                            "https://via.placeholder.com/400x300/1c1c28/ffffff?text=Photo";
                         }}
                       />
                     </div>
@@ -97,9 +104,9 @@ export function PostModal({ post, onClose, onEdit, onDelete }) {
           )}
         </div>
 
-        {/* Actions */}
         <div className="flex items-center justify-between gap-3 px-6 py-4 border-t border-white/8">
           <button
+            type="button"
             onClick={() => onDelete(post.id)}
             className="text-coral/60 hover:text-coral text-sm font-body flex items-center gap-1.5 transition-colors"
           >
@@ -110,10 +117,10 @@ export function PostModal({ post, onClose, onEdit, onDelete }) {
             Delete
           </button>
           <div className="flex gap-2">
-            <button onClick={onClose} className="btn-ghost text-xs">
+            <button type="button" onClick={onClose} className="btn-ghost text-xs">
               Close
             </button>
-            <button onClick={() => onEdit(post)} className="btn-primary text-xs">
+            <button type="button" onClick={() => onEdit(post)} className="btn-primary text-xs">
               Edit Post
             </button>
           </div>

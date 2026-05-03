@@ -6,27 +6,47 @@ import { PostForm } from "../components/PostForm";
 import { FilterBar } from "../components/FilterBar";
 import { LoadingSkeleton } from "../components/LoadingSkeleton";
 import { ErrorBanner } from "../components/ErrorBanner";
+import type { Post, PostFormData } from "../types";
 
-const PANEL = { NONE: "none", CREATE: "create", EDIT: "edit" };
+const PANEL = {
+  NONE: "none",
+  CREATE: "create",
+  EDIT: "edit",
+} as const;
+
+type Panel = (typeof PANEL)[keyof typeof PANEL];
+
+type Toast =
+  | {
+      msg: string;
+      type: "success" | "error";
+    }
+  | null;
 
 export default function PostSchedulerPage() {
   const {
-    posts, loading, error,
-    filter, setFilter,
-    fetchPosts, createPost, updatePost, deletePost,
+    posts,
+    loading,
+    error,
+    filter,
+    setFilter,
+    fetchPosts,
+    createPost,
+    updatePost,
+    deletePost,
   } = usePosts();
 
-  const [selectedPost, setSelectedPost] = useState(null);
-  const [panel, setPanel] = useState(PANEL.NONE);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [panel, setPanel] = useState<Panel>(PANEL.NONE);
   const [formLoading, setFormLoading] = useState(false);
-  const [toast, setToast] = useState(null);
+  const [toast, setToast] = useState<Toast>(null);
 
-  function showToast(msg, type = "success") {
+  function showToast(msg: string, type: "success" | "error" = "success") {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
   }
 
-  function handleCardClick(post) {
+  function handleCardClick(post: Post) {
     setSelectedPost(post);
   }
 
@@ -34,46 +54,48 @@ export default function PostSchedulerPage() {
     setSelectedPost(null);
   }
 
-  function handleEditFromModal(post) {
+  function handleEditFromModal(post: Post) {
     setSelectedPost(post);
     setPanel(PANEL.EDIT);
   }
 
-  async function handleCreate(formData) {
+  async function handleCreate(formData: PostFormData) {
     setFormLoading(true);
     try {
       await createPost(formData);
       setPanel(PANEL.NONE);
       showToast("Post scheduled successfully!");
     } catch (err) {
-      showToast(err.message, "error");
+      showToast((err as Error).message, "error");
     } finally {
       setFormLoading(false);
     }
   }
 
-  async function handleUpdate(formData) {
+  async function handleUpdate(formData: PostFormData) {
+    const id = selectedPost?.id;
+    if (id == null) return;
     setFormLoading(true);
     try {
-      await updatePost(selectedPost?.id, formData);
+      await updatePost(id, formData);
       setPanel(PANEL.NONE);
       setSelectedPost(null);
       showToast("Post updated!");
     } catch (err) {
-      showToast(err.message, "error");
+      showToast((err as Error).message, "error");
     } finally {
       setFormLoading(false);
     }
   }
 
-  async function handleDelete(id) {
+  async function handleDelete(id: number) {
     if (!window.confirm("Delete this post? This cannot be undone.")) return;
     try {
       await deletePost(id);
       setSelectedPost(null);
       showToast("Post deleted.");
     } catch (err) {
-      showToast(err.message, "error");
+      showToast((err as Error).message, "error");
     }
   }
 

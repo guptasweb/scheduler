@@ -1,4 +1,9 @@
-export function ErrorBanner({ message, onRetry }) {
+type ErrorBannerProps = {
+  message: string;
+  onRetry?: () => void;
+};
+
+export function ErrorBanner({ message, onRetry }: ErrorBannerProps) {
   return (
     <div className="flex items-center gap-4 p-4 bg-coral/10 border border-coral/20 rounded-xl">
       <div className="w-8 h-8 bg-coral/10 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -9,14 +14,14 @@ export function ErrorBanner({ message, onRetry }) {
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-coral text-sm font-body">{message}</p>
-        {message?.includes("ECONNREFUSED") || message?.includes("Network") ? (
+        {message.includes("ECONNREFUSED") || message.includes("Network") ? (
           <p className="text-coral/50 text-xs font-mono mt-0.5">
             Is your Rails API running on port 3000?
           </p>
         ) : null}
       </div>
       {onRetry && (
-        <button onClick={onRetry} className="text-coral/60 hover:text-coral text-xs font-mono transition-colors flex-shrink-0">
+        <button type="button" onClick={onRetry} className="text-coral/60 hover:text-coral text-xs font-mono transition-colors flex-shrink-0">
           Retry
         </button>
       )}

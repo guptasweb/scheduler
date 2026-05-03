@@ -1,4 +1,8 @@
-export function LoadingSkeleton({ count = 4 }) {
+type LoadingSkeletonProps = {
+  count?: number;
+};
+
+export function LoadingSkeleton({ count = 4 }: LoadingSkeletonProps) {
   return (
     <div className="space-y-3">
       {Array.from({ length: count }).map((_, i) => (
